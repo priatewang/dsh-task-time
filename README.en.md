@@ -6,6 +6,14 @@ Unlike token or model metrics, this tracks the human: it stops when you leave th
 
 **Language: [中文](README.md) ｜ English**
 
+![Statistics panel](assets/panel.png)
+
+*Tag rollup and task detail, switchable between tag / task / project grouping.*
+
+![Usage log](assets/log.png)
+
+*Usage log: start and end time of every visit, timed by actual engagement.*
+
 ## Features
 
 - **Typing time** — a continuous segment from the first keystroke to the last one; pauses inside the message count, the trailing idle does not.
