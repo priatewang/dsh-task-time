@@ -1,117 +1,110 @@
 # dsh-task-time
 
-Per-task human engagement time for [DeepSeek Harness](https://github.com/deepseek-ai) — measure how long you actually spend **typing** and **reading** in each conversation, with idle cutoffs, tags, and a statistics panel.
+按任务统计**人工投入时间**的 [DeepSeek Harness](https://github.com/deepseek-ai) 插件：分别记录你在每个对话里**打字**和**阅读**了多久，支持空闲自动停表、任务标签与统计面板。
 
-Unlike token or model metrics, this tracks the human: it stops when you leave the task, switch windows, or go idle, and never records message content.
+它统计的是人，不是模型：切走任务、切换窗口、长时间无输入都会停止计时；全程不记录任何消息内容。
 
-## Features
+**语言：中文 ｜ [English](README.en.md)**
 
-- **Typing time** — a continuous segment from the first keystroke to the last one; pauses inside the message count, the trailing idle does not.
-- **Reading time** — starts on a wheel, click, or touch outside the composer; extended by scrolling, selecting, and pointer movement.
-- **Tiered idle cutoffs** — typing stops after 60 s without input, reading after 120 s without activity.
-- **Noise filter** — typing segments under 5 s and reading segments under 30 s are discarded.
-- **Context stops** — switching task, switching panel, losing window focus, or hiding the page ends the segment immediately.
-- **Draft coverage** — typing in a brand-new task before the session exists is kept and adopted once the session is created.
-- **Tags** — multiple tags per task, a persistent tag vocabulary shared across all tasks, and one-click selection while editing.
-- **Header chip** — today's total for the current task, ticking live, click to open the statistics panel.
-- **Statistics panel** — summary cards, tag rollup, grouped detail tables (tag / task / project), and a usage log with start and end times.
-- **Local only** — data lives in `$DSH_HOME/task-time`, no network, no message text, CSV export on demand.
+## 特性
 
-## Install
+- **输入计时** —— 从第一次按键到最后一次按键的一段连续时间；消息内部的停顿计入，结尾的空转不计。
+- **阅读计时** —— 在输入框外滚轮 / 点击 / 触摸开始，滚动、选中、鼠标移动延长。
+- **分阶梯空闲中断** —— 输入 60 秒无操作、阅读 120 秒无活动即停表。
+- **噪音过滤** —— 输入不足 5 秒、阅读不足 30 秒的片段直接丢弃。
+- **上下文中断** —— 切任务、切面板、失焦、页面隐藏立即结束当前段。
+- **草稿也计时** —— 新任务还没创建会话时在输入框里的输入会先挂起，会话创建后自动归入。
+- **标签** —— 一个任务多个标签；全局标签库跨任务复用，编辑时点选即可。
+- **头部胶囊** —— 当前任务今日累计，实时递增，点击打开统计面板。
+- **统计面板** —— 汇总卡、标签统计、按标签 / 任务 / 项目的明细表，以及带开始结束时间的「使用记录」。
+- **纯本地** —— 数据在 `$DSH_HOME/task-time`，不联网、不存文本，可随时导出 CSV。
 
-1. Clone this repository somewhere stable:
+## 安装
+
+1. 克隆仓库到固定位置：
 
    ```bash
    git clone https://github.com/priatewang/dsh-task-time.git
    ```
 
-2. Install the bundle into your Harness profile through the plugin manager, pointing it at the checkout directory (`install_bundle` with the absolute path). The bundle installs itself as a local link, so pulling updates only needs a plugin reload.
+2. 在 Harness 的插件管理里安装该目录（`install_bundle`，目标为检出的绝对路径）。它是本地链接安装，之后 `git pull` 只需要重载插件。
 
-3. Reload the page. A clock icon appears in the sidebar panel list; the conversation header gains a small time chip.
+3. 刷新页面。侧边栏面板图标里出现时钟图标，会话标题栏出现时间胶囊。
 
-No build step: `client.js` is a plain browser module and `index.js` is a plain ESM plugin.
+没有构建步骤：`client.js` 是浏览器模块，`index.js` 是普通 ESM 插件。
 
-## Usage
+## 使用
 
-| Where | What |
+| 位置 | 作用 |
 | --- | --- |
-| Sidebar → clock icon | Opens the statistics panel |
-| Conversation header chip | Today's typing / reading total for this task; click to open the panel |
-| Panel → 统计 | Summary cards, tag summary, task tables grouped by tag / task / project |
-| Panel → 使用记录 | One row per visit with `HH:mm – HH:mm`, duration, task, tags |
-| Panel → 标签 → 编辑 | Toggle existing tags, type a new one, save |
+| 侧边栏 → 时钟图标 | 打开统计面板 |
+| 会话标题栏胶囊 | 当前任务今天的输入 / 阅读累计，点击进面板 |
+| 面板 → 统计 | 汇总卡、标签统计、按标签 / 任务 / 项目分组的明细 |
+| 面板 → 使用记录 | 每次使用的 `HH:mm – HH:mm`、时长、任务、标签 |
+| 面板 → 标签 → 编辑 | 点选已有标签、输入新标签、保存 |
 
-Range switch: today / last 7 days / last 30 days / all.
+时间范围：今天 / 近 7 天 / 近 30 天 / 全部。
 
-## Configuration
+## 配置
 
 ```yaml
 - id: task-time
   name: dsh-task-time
   config:
-    inputIdleMs: 60000    # typing idle cutoff
-    readIdleMs: 120000    # reading idle cutoff
+    inputIdleMs: 60000    # 输入空闲阈值
+    readIdleMs: 120000    # 阅读空闲阈值
 ```
 
-Changing the config restarts the plugin row.
+改配置会重启该插件行。
 
-## Timing rules
+## 计时规则
 
-| Event | Typing | Reading |
+| 事件 | 输入 | 阅读 |
 | --- | --- | --- |
-| First keystroke / IME commit / paste in composer | starts | — |
-| Wheel, click, or touch outside the composer | ends at the last keystroke | starts |
-| Scroll, pointer move, selection | ignored | extends |
-| Caret move, text selection, auto-scrolling output | never interrupts | extends reading |
-| Click inside the composer | — | ends |
-| Switch task / panel, blur, hidden page | ends | ends |
-| Idle cutoff | 60 s → ends at last keystroke | 120 s → ends at last activity |
+| 输入框内按键 / 输入法上屏 / 粘贴 | 开始 | — |
+| 输入框外滚轮、点击、触摸 | 停在最后一次按键 | 开始 |
+| 滚动、鼠标移动、选中文字 | 不中断 | 延长 |
+| 光标移动、自动滚屏 | 不中断 | 延长 |
+| 点击输入框内 | — | 结束 |
+| 切任务 / 切面板 / 失焦 / 页面隐藏 | 结束 | 结束 |
+| 空闲阈值 | 60 秒 → 停在最后一次按键 | 120 秒 → 停在最后一次活动 |
 
-A segment ended by an idle cutoff keeps the time up to the **last activity**, so the idle tail is never counted.
+因空闲停表时，结束点取**最后一次活动时刻**，所以结尾的空转永远不计入。
 
-## Data
+## 数据与隐私
 
 ```
 $DSH_HOME/task-time/
-  intervals.jsonl   # { s: sessionId, c: "input"|"read", a: start, b: end, w: windowId }
-  tags.json         # { "<sessionId>": ["work", "project-x"] }
+  intervals.jsonl   # { s: 会话id, c: "input"|"read", a: 开始, b: 结束, w: 窗口id }
+  tags.json         # { "<会话id>": ["工作", "项目A"] }
 ```
 
-Only timestamps, session ids and tags are stored — no message text, no keystrokes, no screenshots.
+只存时间戳、会话 id 和标签——不存消息内容、不存按键、不截图。
 
-## HTTP surface (same origin)
+## HTTP 接口（同源）
 
-| Method | Path | Purpose |
+| 方法 | 路径 | 用途 |
 | --- | --- | --- |
 | `POST` | `/task-time/ingest` | `{ intervals: [{ sid, ch, start, end, w }] }` |
 | `POST` | `/task-time/tag` | `{ sid, tags: string[] }` |
-| `GET` | `/task-time/state?from&to` | aggregated rows, tags, vocabulary |
-| `GET` | `/task-time/log?from&to&gap` | visits with start / end |
-| `GET` | `/task-time/session?sid&from&to` | one task's totals (header chip) |
-| `GET` | `/task-time/export.csv?from&to` | CSV export |
+| `GET` | `/task-time/state?from&to` | 聚合行、标签、标签库 |
+| `GET` | `/task-time/log?from&to&gap` | 使用记录（开始 / 结束） |
+| `GET` | `/task-time/session?sid&from&to` | 单任务合计（头部胶囊） |
+| `GET` | `/task-time/export.csv?from&to` | CSV 导出 |
 
-## Development
+## 目录结构
 
 ```
-index.js          host half: HTTP routes, JSONL store, aggregation
-client.js         browser half: tracker state machine + statistics UI
-cordis.patch.yml  bundle patch (row id `task-time`)
-locale/           plugin meta title/description (en, zh)
-icon.svg          sidebar icon
-docs/REQUIREMENTS.md  full behaviour contract, written platform-agnostic
+index.js              宿主：HTTP 路由、JSONL 存储、聚合
+client.js             浏览器：状态机 + 统计界面
+cordis.patch.yml      插件行定义（行 id `task-time`）
+locale/               插件标题与描述（en / zh）
+icon.svg              侧边栏图标
+docs/REQUIREMENTS.md  完整行为契约（与平台无关）
 ```
 
-There is no build pipeline. Syntax check with `node --check client.js` and `node --check index.js` (as ESM).
+无构建流程。语法检查：`node --check client.js`、`node --check index.js`。
 
-## 中文说明
+## 许可证
 
-按任务统计**人工投入时间**的 DeepSeek Harness 插件：分别记录「输入」和「阅读」，空闲超时、切走、失焦自动停表；标签可复用、可分类统计；数据只存在本机 `$DSH_HOME/task-time`，不记录任何文本。
-
-- 输入：首次按键开始，连续计时到中断或 60 秒无输入；少于 5 秒不计。
-- 阅读：滚轮/点击开始，滚动或移动延长，120 秒无活动停止；少于 30 秒不计。
-- 停表按「最后一次活动」结算，空转不计入。
-- 面板分「统计 / 使用记录」，使用记录给出每次使用的开始与结束时间，时长按实测投入求和，不按首末跨度计算。
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+MIT —— 见 [LICENSE](LICENSE)。
