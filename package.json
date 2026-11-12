@@ -2,18 +2,31 @@
   "name": "dsh-task-time",
   "version": "1.0.0",
   "description": "Per-task human engagement time for DeepSeek Harness: typing and reading segments with idle cutoffs, tags and statistics",
-  "license": "MIT",
   "type": "module",
+  "main": "./index.js",
+  "license": "MIT",
   "keywords": [
     "dsh",
+    "dsh-plugin",
     "deepseek-harness",
-    "plugin",
     "time-tracking",
-    "productivity"
+    "productivity",
+    "statistics",
+    "tags"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/priatewang/dsh-task-time.git"
+  },
+  "homepage": "https://github.com/priatewang/dsh-task-time#readme",
+  "bugs": {
+    "url": "https://github.com/priatewang/dsh-task-time/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
   },
   "exports": {
     ".": "./index.js",
