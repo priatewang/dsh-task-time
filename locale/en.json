@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Task time",
+    "description": "Tracks typing and reading time per task, with idle cutoffs, focus loss, and tag-based statistics."
+  }
+}

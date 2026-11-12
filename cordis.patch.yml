@@ -1,0 +1,6 @@
+- insert:
+    - id: task-time
+      name: 'dsh-task-time'
+      config:
+        inputIdleMs: 60000
+        readIdleMs: 120000
